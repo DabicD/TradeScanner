@@ -6,10 +6,10 @@ import {
   TimeScaleFitContentTrigger,
 } from "lightweight-charts-react-components";
 import type { ChartOptions, DeepPartial } from "lightweight-charts";
-import stockDataAdapter from "@/src/features/chart/utils/stockDataAdapter";
 import { chartSeriesMap } from "../chartSeriesMap";
 import { useMemo, useState } from "react";
 import type { TAllAdaptersInputs, TChartSeriesKeys } from "../types";
+import stockDataAdapter from "../utils/stockDataAdapter";
 
 export interface IAdvancedChart {
   data: TAllAdaptersInputs;
