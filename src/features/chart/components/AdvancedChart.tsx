@@ -6,54 +6,41 @@ import {
   TimeScaleFitContentTrigger,
 } from "lightweight-charts-react-components";
 import type { ChartOptions, DeepPartial } from "lightweight-charts";
-import { chartSeriesMap } from "../chartSeriesMap";
-import { useMemo, useState } from "react";
-import type { TAllAdaptersInputs, TChartSeriesKeys } from "../types";
+import { useMemo } from "react";
+import type { TAllAdaptersInputs } from "../types";
 import stockDataAdapter from "../utils/stockDataAdapter";
+import { chartSeriesMap } from "../chartSeriesMap";
+import useChartSeries from "@/hooks/useChartSeries";
 
 export interface IAdvancedChart {
   data: TAllAdaptersInputs;
   dataAdapter: keyof typeof stockDataAdapter;
+  id: string;
 }
 
-const AdvancedChart = ({ data = [], dataAdapter }: IAdvancedChart) => {
-  // @TODO: replace with zustand, move select to separate component.
-  const options = Object.keys(chartSeriesMap) as Array<TChartSeriesKeys>;
-  const [selectedSeries, setSelectedSeries] = useState<TChartSeriesKeys>(
-    options?.[0] || "Candlestick",
-  );
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedSeries(e.target.value as TChartSeriesKeys);
-  };
+const AdvancedChart = ({
+  data = [],
+  dataAdapter,
+  id: chartId,
+}: IAdvancedChart) => {
+  const { seriesType } = useChartSeries(chartId);
 
-  // Adapting data to newly selected ChartSeries.
+  // Select chart series type
   const [ChartSeriesComponent, chartSeriesOptions] = useMemo(
     () => [
-      chartSeriesMap[selectedSeries]?.Component,
-      chartSeriesMap[selectedSeries]?.options,
+      chartSeriesMap[seriesType]?.Component,
+      chartSeriesMap[seriesType]?.options,
     ],
-    [selectedSeries],
+    [seriesType],
   );
+  // Data adaptation
   const transformedData = useMemo(
-    () => stockDataAdapter[dataAdapter](data, selectedSeries),
-    [dataAdapter, data, selectedSeries],
+    () => stockDataAdapter[dataAdapter](data, seriesType),
+    [dataAdapter, data, seriesType],
   );
 
   return (
     <section className="flex flex-col h-150 gap-5">
-      {/* @TODO: move to separate file */}
-      <select
-        value={selectedSeries}
-        onChange={handleChange}
-        className="p-2 border rounded bg-black"
-      >
-        {options.map((key) => (
-          <option key={key} value={key}>
-            {/* @TODO: add translation */}
-            {key}
-          </option>
-        ))}
-      </select>
       <Chart
         options={chartCommonOptions}
         containerProps={{ style: { flexGrow: "1" } }}
